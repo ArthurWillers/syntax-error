@@ -82,7 +82,7 @@ body {
 
 /* Brutalist HUD */
 #hud {
-    display: flex;
+    display: none;
     justify-content: space-between;
     padding: 20px;
     background: #000;
@@ -197,11 +197,13 @@ body {
 .overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.95);
+    background: #050505;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    overflow-y: auto;
+    padding: 40px 0;
     z-index: 100;
     opacity: 0;
     pointer-events: none;
@@ -335,21 +337,21 @@ body {
     padding-bottom: 5px;
 }
 
-#leaderboard-list {
+.leaderboard-list {
     list-style: none;
     font-family: var(--font-code);
     font-size: 1.2rem;
 }
 
-#leaderboard-list li {
+.leaderboard-list li {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
     border-bottom: 1px dashed #333;
 }
-#leaderboard-list li .lb-rank { color: var(--brutal-magenta); width: 30px; }
-#leaderboard-list li .lb-name { color: var(--text-main); flex: 1; text-align: left; }
-#leaderboard-list li .lb-score { color: var(--brutal-cyan); font-weight: 900; }
+.leaderboard-list li .lb-rank { color: var(--brutal-magenta); width: 30px; }
+.leaderboard-list li .lb-name { color: var(--text-main); flex: 1; text-align: left; }
+.leaderboard-list li .lb-score { color: var(--brutal-cyan); font-weight: 900; }
 
 /* Buttons */
 .game-over-actions {

@@ -1,57 +1,10 @@
-const LANGUAGE_DICTS = {
-    "c": [
-        "include", "define", "struct", "typedef", "return", "sizeof", "malloc", "calloc", 
-        "printf", "scanf", "switch", "break", "continue", "default", "while", "for", "do", 
-        "int", "float", "double", "char", "void", "enum", "static", "extern", "const", 
-        "volatile", "register", "unsigned", "signed", "short", "long", "if", "else", "goto", "main",
-        "FILE", "fopen", "fclose", "fread", "fwrite", "fprintf", "fscanf", "feof", "ferror", "clearerr", "fseek", "ftell", "rewind"
-    ],
-    "pascal": [
-        "program", "const", "type", "var", "begin", "end", "procedure", "function", "array", 
-        "of", "record", "if", "then", "else", "while", "do", "repeat", "until", "for", "to", 
-        "downto", "case", "with", "integer", "real", "boolean", "char", "string", "true", 
-        "false", "and", "or", "not", "div", "mod", "writeln", "readln", "clrscr", "uses",
-        "forward", "nil", "packed", "set", "file", "text", "assign", "reset", "rewrite", "close"
-    ],
-    "java": [
-        "public", "private", "protected", "static", "final", "void", "main", "class", "interface", 
-        "extends", "implements", "new", "this", "super", "return", "if", "else", "switch", 
-        "case", "break", "continue", "default", "for", "while", "do", "try", "catch", "finally", 
-        "throw", "throws", "import", "package", "byte", "short", "int", "long", "float", 
-        "double", "boolean", "char", "true", "false", "null", "abstract", "synchronized",
-        "volatile", "transient", "instanceof", "strictfp", "native", "enum", "assert", "String", "Object", "System", "out", "println"
-    ],
-    "python": [
-        "def", "class", "return", "yield", "import", "from", "as", "if", "elif", "else", 
-        "while", "for", "in", "break", "continue", "pass", "try", "except", "finally", "raise", 
-        "assert", "with", "global", "nonlocal", "lambda", "and", "or", "not", "is", "true", 
-        "false", "none", "print", "len", "range", "enumerate", "zip", "dict", "list", "set", "tuple",
-        "open", "read", "write", "close", "append", "extend", "insert", "remove", "pop", "clear", "index", "count", "sort", "reverse"
-    ],
-    "js": [
-        "function", "return", "if", "else", "switch", "case", "break", "continue", "default", 
-        "for", "while", "do", "try", "catch", "finally", "throw", "var", "let", "const", 
-        "class", "extends", "constructor", "super", "this", "new", "import", "export", 
-        "from", "as", "typeof", "instanceof", "in", "of", "true", "false", "null", "undefined", 
-        "async", "await", "yield", "map", "filter", "reduce", "foreach", "promise", "console",
-        "document", "window", "setTimeout", "setInterval", "clearTimeout", "clearInterval", "JSON", "parse", "stringify", "Math", "random"
-    ],
-    "shell": [
-        "echo", "printf", "read", "cd", "pwd", "ls", "cp", "mv", "rm", "mkdir", "rmdir", 
-        "touch", "cat", "less", "tail", "head", "grep", "awk", "sed", "find", "xargs", 
-        "chmod", "chown", "sudo", "su", "bash", "sh", "export", "set", "unset", "alias", 
-        "unalias", "source", "if", "then", "elif", "else", "fi", "case", "esac", "for", 
-        "while", "do", "done", "break", "continue", "exit", "return", "local", "shift", "trap", "wait", "eval", "exec", "kill"
-    ],
-    "sql": [
-        "select", "from", "where", "insert", "into", "values", "update", "set", "delete", 
-        "create", "table", "drop", "alter", "add", "column", "primary", "foreign", "key", 
-        "references", "join", "inner", "left", "right", "outer", "full", "on", "group", 
-        "by", "having", "order", "asc", "desc", "limit", "offset", "union", "all", "as", 
-        "in", "like", "is", "null", "not", "and", "or", "count", "sum", "avg", "min", "max", "distinct",
-        "index", "view", "trigger", "procedure", "function", "commit", "rollback", "grant", "revoke", "truncate", "cascade"
-    ]
-};
+const LANGUAGE_DICTS = {};
+for (const lang in LANGUAGE_DATA) {
+    LANGUAGE_DICTS[lang] = [];
+    for (const category in LANGUAGE_DATA[lang]) {
+        LANGUAGE_DICTS[lang].push(...LANGUAGE_DATA[lang][category]);
+    }
+}
 
 // Configurações de Dificuldade
 const DIFFICULTY_CONFIGS = {
@@ -103,6 +56,7 @@ let score = 0;
 let lives = 3;
 let currentSpeedScalar = 1.0;
 let currentSpawnRate = 2600; 
+let nextSpawnDelay = 2600;
 let lastSpawnTime = 0;
 let lastTime = 0;
 let activeWords = [];
@@ -114,51 +68,90 @@ let animationId = null;
 const SCORE_KEY = 'syntaxErrorScores';
 
 // ---- SISTEMA DE HIGHSCORE ----
-function getHighScores() {
+function getSelectedDifficulty() {
+    const selected = Array.from(diffRadios).find(r => r.checked);
+    return selected ? selected.value : "NORMAL";
+}
+
+function getHighScores(difficulty) {
     const scoresJSON = localStorage.getItem(SCORE_KEY);
-    if (!scoresJSON) return [];
-    try {
-        return JSON.parse(scoresJSON);
-    } catch(e) {
-        return [];
+    let allScores = { EASY: [], NORMAL: [], HARD: [] };
+    if (scoresJSON) {
+        try {
+            const parsed = JSON.parse(scoresJSON);
+            if (Array.isArray(parsed)) {
+                allScores.NORMAL = parsed; // Migrate old scores
+            } else {
+                allScores = { ...allScores, ...parsed };
+            }
+        } catch(e) {}
     }
+    const result = allScores[difficulty];
+    return Array.isArray(result) ? result : [];
 }
 
-function saveHighScore(nick, newScore) {
-    let scores = getHighScores();
-    scores.push({ nick: nick, score: newScore });
-    // Ordenar do maior para o menor
-    scores.sort((a, b) => b.score - a.score);
-    // Manter apenas Top 5
-    if (scores.length > 5) scores = scores.slice(0, 5);
-    localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
+function saveHighScore(nick, newScore, difficulty) {
+    const scoresJSON = localStorage.getItem(SCORE_KEY);
+    let allScores = { EASY: [], NORMAL: [], HARD: [] };
+    if (scoresJSON) {
+        try {
+            const parsed = JSON.parse(scoresJSON);
+            if (Array.isArray(parsed)) {
+                allScores.NORMAL = parsed;
+            } else {
+                allScores = { ...allScores, ...parsed };
+            }
+        } catch(e) {}
+    }
+
+    let diffScores = allScores[difficulty] || [];
+    if (!Array.isArray(diffScores)) diffScores = [];
+    
+    diffScores.push({ nick: nick, score: newScore });
+    diffScores.sort((a, b) => b.score - a.score);
+    if (diffScores.length > 5) diffScores = diffScores.slice(0, 5);
+    
+    allScores[difficulty] = diffScores;
+    localStorage.setItem(SCORE_KEY, JSON.stringify(allScores));
 }
 
-function isHighScore(newScore) {
+function isHighScore(newScore, difficulty) {
     if (newScore === 0) return false;
-    let scores = getHighScores();
+    let scores = getHighScores(difficulty);
     if (scores.length < 5) return true;
     return newScore > scores[scores.length - 1].score;
 }
 
-function renderLeaderboard() {
-    let scores = getHighScores();
-    leaderboardList.innerHTML = '';
+function renderLeaderboard(difficulty) {
+    let scores = getHighScores(difficulty);
+    
+    document.getElementById('menu-lb-diff').textContent = difficulty;
+    document.getElementById('gameover-lb-diff').textContent = difficulty;
+    
+    const menuList = document.getElementById('menu-leaderboard-list');
+    const gameOverList = document.getElementById('gameover-leaderboard-list');
     
     if (scores.length === 0) {
-        leaderboardList.innerHTML = '<li><span class="lb-name">SEM REGISTROS AINDA...</span></li>';
-        return;
+        menuList.parentElement.style.display = 'none';
+        gameOverList.parentElement.style.display = 'none';
+    } else {
+        menuList.parentElement.style.display = 'block';
+        gameOverList.parentElement.style.display = 'block';
+        
+        let html = '';
+        scores.forEach((entry, idx) => {
+            html += `
+                <li>
+                    <span class="lb-rank">#${idx + 1}</span>
+                    <span class="lb-name">${entry.nick}</span>
+                    <span class="lb-score">${entry.score}</span>
+                </li>
+            `;
+        });
+        
+        menuList.innerHTML = html;
+        gameOverList.innerHTML = html;
     }
-    
-    scores.forEach((entry, idx) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span class="lb-rank">#${idx + 1}</span>
-            <span class="lb-name">${entry.nick}</span>
-            <span class="lb-score">${entry.score}</span>
-        `;
-        leaderboardList.appendChild(li);
-    });
 }
 // -----------------------------
 
@@ -275,10 +268,12 @@ function initGame() {
     lives = 3;
     currentSpeedScalar = 1.0;
     currentSpawnRate = currentDiffConfig.startSpawnRate;
+    nextSpawnDelay = currentSpawnRate;
     
     clearPlayArea();
     updateHUD();
     
+    document.getElementById('hud').style.display = 'flex';
     menuOverlay.classList.remove('active');
     gameOverOverlay.classList.remove('active');
     
@@ -311,12 +306,15 @@ function flashScreen() {
 function gameOver() {
     isPlaying = false;
     cancelAnimationFrame(animationId);
+    
+    document.getElementById('hud').style.display = 'none';
     finalScoreEl.textContent = score;
     
-    renderLeaderboard();
+    const playedDiff = getSelectedDifficulty();
+    renderLeaderboard(playedDiff);
     
     // Mostra/Esconde Input de Highscore
-    if (isHighScore(score)) {
+    if (isHighScore(score, playedDiff)) {
         highscoreEntryDiv.classList.remove('hidden');
         nicknameInput.value = '';
         setTimeout(() => nicknameInput.focus(), 100);
@@ -339,13 +337,15 @@ function increaseDifficulty() {
 }
 
 function spawnWord() {
-    if (WORD_LIST.length === 0) return;
+    if (WORD_LIST.length === 0) return 0;
     
     const wordText = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
     const xPos = 10 + Math.random() * 80; 
     
     const word = new WordEntity(wordText, xPos);
     activeWords.push(word);
+    
+    return wordText.length;
 }
 
 function gameLoop(timestamp) {
@@ -354,8 +354,11 @@ function gameLoop(timestamp) {
     const dt = timestamp - lastTime;
     lastTime = timestamp;
 
-    if (timestamp - lastSpawnTime > currentSpawnRate) {
-        spawnWord();
+    if (timestamp - lastSpawnTime > nextSpawnDelay) {
+        const lastWordLength = spawnWord();
+        let lengthMultiplier = lastWordLength / 6;
+        lengthMultiplier = Math.max(0.4, Math.min(2.5, lengthMultiplier));
+        nextSpawnDelay = currentSpawnRate * lengthMultiplier;
         lastSpawnTime = timestamp;
     }
 
@@ -390,8 +393,19 @@ function gameLoop(timestamp) {
 window.addEventListener('keydown', (e) => {
     if (!isPlaying) return;
     
+    // Atalho para cancelar a partida (Ctrl + C)
+    if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+        isPlaying = false;
+        cancelAnimationFrame(animationId);
+        clearPlayArea();
+        document.getElementById('hud').style.display = 'none';
+        renderLeaderboard(getSelectedDifficulty());
+        setTimeout(() => menuOverlay.classList.add('active'), 100);
+        return;
+    }
+    
     if (e.key.length !== 1) return;
-    const char = e.key.toLowerCase();
+    const char = e.key;
     
     if (targetWord) {
         if (targetWord.typeLetter(char)) {
@@ -445,14 +459,16 @@ btnRestart.addEventListener('click', () => {
 btnMenu.addEventListener('click', () => {
     gameOverOverlay.classList.remove('active');
     clearPlayArea();
+    renderLeaderboard(getSelectedDifficulty());
     setTimeout(() => menuOverlay.classList.add('active'), 100);
 });
 
 btnSubmitScore.addEventListener('click', () => {
     const nick = nicknameInput.value.trim().toUpperCase() || 'ANONYMOUS';
-    saveHighScore(nick, score);
+    const playedDiff = getSelectedDifficulty();
+    saveHighScore(nick, score, playedDiff);
     highscoreEntryDiv.classList.add('hidden'); // Esconde o form
-    renderLeaderboard(); // Atualiza a tabela imediatamente
+    renderLeaderboard(playedDiff); // Atualiza a tabela imediatamente
 });
 
 nicknameInput.addEventListener('keydown', (e) => {
@@ -461,3 +477,13 @@ nicknameInput.addEventListener('keydown', (e) => {
         btnSubmitScore.click();
     }
 });
+
+// Atualizar leaderboard ao trocar dificuldade no menu
+diffRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        renderLeaderboard(e.target.value);
+    });
+});
+
+// Render inicial
+renderLeaderboard(getSelectedDifficulty());
