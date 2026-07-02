@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNTAX ERROR - Cyberpunk Brutalism</title>
+    
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;900&family=Fira+Code:wght@700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Grid 3D de Fundo -->
+    <div id="grid-bg"></div>
+
+    <div id="game-container">
+        <!-- HUD Principal -->
+        <header id="hud">
+            <div class="hud-item brutal-box">
+                <span class="label">SCORE</span>
+                <span id="score" class="value">0</span>
+            </div>
+            <div class="hud-item brutal-box">
+                <span class="label">LIVES</span>
+                <div id="lives" class="lives-container">
+                    <span class="heart active">█</span>
+                    <span class="heart active">█</span>
+                    <span class="heart active">█</span>
+                </div>
+            </div>
+            <div class="hud-item brutal-box">
+                <span class="label">SPEED</span>
+                <span id="speed-level" class="value">1.0x</span>
+            </div>
+        </header>
+
+        <!-- Área de Spawn de Palavras -->
+        <main id="play-area">
+            <!-- As palavras cairão aqui geradas via JS -->
+            
+            <!-- Linha Base de perigo -->
+            <div id="ground-line"></div>
+            <div class="ground-glow"></div>
+        </main>
+
+        <!-- Telas de Menu -->
+        <div id="menu-overlay" class="overlay active">
+            <h1 class="title-brutal">SYNTAX<br><span class="accent">ERROR</span></h1>
+            <p class="subtitle">DESTRUA O CÓDIGO ANTES DO IMPACTO</p>
+            
+            <div class="config-section">
+                <!-- Seletor de Dificuldade -->
+                <div class="diff-selection">
+                    <p>DIFICULDADE DO SISTEMA:</p>
+                    <div class="diff-grid">
+                        <label class="brutal-toggle diff-toggle"><input type="radio" name="difficulty" value="EASY"> <span class="toggle-btn">EASY</span></label>
+                        <label class="brutal-toggle diff-toggle"><input type="radio" name="difficulty" value="NORMAL" checked> <span class="toggle-btn">NORMAL</span></label>
+                        <label class="brutal-toggle diff-toggle"><input type="radio" name="difficulty" value="HARD"> <span class="toggle-btn">HARD</span></label>
+                    </div>
+                </div>
+
+                <!-- Seletor de Linguagens -->
+                <div class="lang-selection">
+                    <p>PACOTES DE LINGUAGEM:</p>
+                    <div class="lang-grid">
+                        <label class="brutal-toggle"><input type="checkbox" value="c"> <span class="toggle-btn">C</span></label>
+                        <label class="brutal-toggle"><input type="checkbox" value="pascal"> <span class="toggle-btn">PASCAL</span></label>
+                        <label class="brutal-toggle"><input type="checkbox" value="java"> <span class="toggle-btn">JAVA</span></label>
+                        <label class="brutal-toggle"><input type="checkbox" value="python"> <span class="toggle-btn">PYTHON</span></label>
+                        <label class="brutal-toggle"><input type="checkbox" value="js"> <span class="toggle-btn">JS</span></label>
+                        <label class="brutal-toggle"><input type="checkbox" value="shell"> <span class="toggle-btn">SHELL</span></label>
+                        <label class="brutal-toggle"><input type="checkbox" value="sql"> <span class="toggle-btn">SQL</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-start" class="btn-brutal btn-primary">INICIAR SISTEMA</button>
+        </div>
+
+        <div id="game-over-overlay" class="overlay">
+            <h1 class="title-brutal error">FALHA CRÍTICA</h1>
+            <div class="brutal-box final-score-box">
+                SCORE: <span id="final-score" class="accent">0</span>
+            </div>
+
+            <!-- Formulário de Nickname (Aparece se bater recorde) -->
+            <div id="highscore-entry" class="highscore-entry hidden">
+                <p class="new-record-msg">NOVO RECORDE LOCAL!</p>
+                <div class="input-group">
+                    <input type="text" id="nickname-input" class="brutal-input" maxlength="10" placeholder="SEU NICK..." autocomplete="off">
+                    <button id="btn-submit-score" class="btn-brutal btn-small btn-primary">SALVAR</button>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="leaderboard-container brutal-box">
+                <h3>TOP 5 LOCAL</h3>
+                <ul id="leaderboard-list">
+                    <!-- Gerado via JS -->
+                </ul>
+            </div>
+
+            <div class="game-over-actions">
+                <button id="btn-restart" class="btn-brutal btn-error">TENTAR NOVAMENTE</button>
+                <button id="btn-menu" class="btn-brutal">MENU PRINCIPAL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Efeitos Globais -->
+    <div id="scanlines"></div>
+    <div id="screen-flash"></div>
+
+    <script src="game.js"></script>
+</body>
+</html>
