@@ -210,6 +210,12 @@ body {
     transition: opacity 0.3s ease;
 }
 
+.overlay::before,
+.overlay::after {
+    content: '';
+    margin: auto;
+}
+
 .overlay.active {
     opacity: 1;
     pointer-events: all;
