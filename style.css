@@ -418,3 +418,21 @@ body {
 }
 
 #screen-flash.flash { opacity: 0.5; }
+
+/* Link do Repositório */
+.github-link {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    letter-spacing: 2px;
+    transition: color 0.2s, text-shadow 0.2s;
+}
+
+.github-link:hover {
+    color: var(--brutal-yellow);
+    text-shadow: 2px 2px 0px var(--brutal-magenta);
+}
